@@ -1,3 +1,10 @@
+#Environnement virtuel
 venv/
 *.zip
+
+#Jupiters notebooks
 Jupiters\ notebook/
+
+#Pycache
+__pycache__/
+*.pyc
