@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 
     #Choix du jeu de données
-    data=df_circ_1M
+    data=df_xx
 
     #### Vérification de la conformité du jeu de données et mise en forme
     (_, nb_col) = data.shape
@@ -45,7 +45,6 @@ if __name__ == "__main__":
 
     # Affichage des histogrammes
     hist.aff_hist(data)
-    plt.show()
 
     intric=eval_intric.eval_intric(data) # True si les photons sont intriqués
 
@@ -55,3 +54,4 @@ if __name__ == "__main__":
         print("Les photons sont indépendants")
         (theta1, theta2) = eval_model.theta(data)
     
+    plt.show()

@@ -55,8 +55,15 @@ def eval_theta(data):
     table_pvalues = np.asarray([pvalue(theta) for theta in test_theta])
     #print(table_pvalues[table_pvalues > 0.05])
     indices_pvaleur_grande = np.where(table_pvalues > 0.05)[0]
-    CI = [float(test_theta[indices_pvaleur_grande[0]]), float(test_theta[indices_pvaleur_grande[-1]])]
-    return CI
+    if len(indices_pvaleur_grande)>0: # existence d'un intervalle de theta vérifiant p-valeur > 0.05
+        if abs(test_theta[indices_pvaleur_grande[-1]]-test_theta[indices_pvaleur_grande[0]]) < 5 : 
+            assert(abs(test_theta[indices_pvaleur_grande[-1]]-test_theta[indices_pvaleur_grande[0]]) < 1), "Evaluation de theta trop imprécise"
+            CI = [float(test_theta[indices_pvaleur_grande[0]]), float(test_theta[indices_pvaleur_grande[-1]])]
+        else: 
+            CI = [[0, test_theta[indices_pvaleur_grande[0]]], [test_theta[indices_pvaleur_grande[-1]], 180]] # gère le cas ou theta oscille entre 0 et 180 degrés
+        return CI
+    else:
+        return None
 
 def theta(data):
     global table_alpha, obs, test_theta, table_alpha_uniques, nb_alpha, moyenne_obs_alpha
@@ -64,8 +71,20 @@ def theta(data):
     data1 = data1.rename(columns={'alpha': 'alpha', 'Xa':'X', 'Ya':'Y'})
     data2 = data[['beta', 'Xb', 'Yb']]
     data2 = data2.rename(columns={'beta': 'alpha', 'Xb':'X', 'Yb':'Y'})
-    theta1 = eval_theta(data1) #theta_alpha appartenant à l'intervalle de confiance si existence
-    print(f"Estimation de theta pour alpha entre : [{theta1[0]} ; {theta1[1]}]")
-    theta2 = eval_theta(data2) #theta_beta appartenant à l'intervalle de confiance si existence
-    print(f"Estimation de theta pour beta entre : [{theta2[0]} ; {theta2[1]}]")
+    theta1 = eval_theta(data1) #theta_alpha appartenant à l'intervalle de confiance
+    if theta1:
+        if isinstance(theta1[0], float):
+            print(f"Estimation de theta pour alpha entre : [{theta1[0]} ; {theta1[1]}]")
+        else:
+            print(f"Estimation de theta pour alpha entre : d'une part [{theta1[0][0]} ; {theta1[0][1]}] et d'autre part [{theta1[1][0]} ; {theta1[1][1]}]")
+    else:
+        print("Aucun θ compatible avec une loi cos² — modèle rejeté pour alpha.")
+    theta2 = eval_theta(data2) #theta_beta appartenant à l'intervalle de confiance
+    if theta2:
+        if isinstance(theta2[0], float):
+            print(f"Estimation de theta pour alpha entre : [{theta2[0]} ; {theta2[0]}]")
+        else:
+            print(f"Estimation de theta pour alpha entre : d'une part [{theta2[0][0]} ; {theta2[0][1]}] et d'autre part [{theta2[1][0]} ; {theta2[1][1]}]")
+    else:
+        print("Aucun θ compatible avec une loi cos² — modèle rejeté pour beta.")
     return (theta1, theta2)
