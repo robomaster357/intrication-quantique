@@ -5,6 +5,6 @@ venv/
 #Jupiters notebooks
 Jupiters\ notebook/
 
-#Pycache
+# Python cache
 __pycache__/
 *.pyc
