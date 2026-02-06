@@ -1,0 +1,11 @@
+fichier,angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication,viole CHSH
+dataset-00.csv,-1.0,-1.0,-1.0,-1.0,8.788410880010051e-10,True,True
+dataset-01.csv,-1.0,-1.0,-1.0,-1.0,1.0,True,True
+dataset-02.csv,-1.0,-1.0,-1.0,-1.0,0.4541580674058162,True,True
+dataset-03.csv,-1.0,-1.0,-1.0,-1.0,1.0,True,True
+dataset-04.csv,-1.0,-1.0,-1.0,-1.0,0.228347791961111,True,True
+dataset-05.csv,-1.0,-1.0,-1.0,-1.0,1.0,True,True
+dataset-06.csv,79.9,0.547839152212344,79.30000000000001,0.7045573573619417,0.0,False,False
+dataset-07.csv,-1.0,-1.0,-1.0,-1.0,1.0,True,True
+dataset-08.csv,-1.0,-1.0,-1.0,-1.0,0.0,False,False
+dataset-09.csv,-1.0,-1.0,-1.0,-1.0,1.0,True,True

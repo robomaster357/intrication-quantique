@@ -32,6 +32,7 @@ def test_unitaire(data): #version graphique et jolie de l'analyse des fichiers
     hist.proba_X(data)
 
     S, pval=eval_intric.eval_intric(data) # True si les photons sont intriqués
+    print(S, pval)
     if S > 2.1:
         print("Les photons sont intriqués")
     else:
@@ -60,9 +61,10 @@ def analyse(data):
 
     ######## Extraction des différents paramètres
     S, pvalue_correlation = eval_intric.eval_intric(data)
-    intrication = S > 2.1
+    viole_CHSH = S > 2.78
+    intrication = S > 2.2
     (angle1, pvalue1, angle2, pvalue2) = eval_model.theta_ideal(data) #Méthode de Fischer ne marche pas pour df_xx
-    return angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication
+    return angle1,pvalue1,angle2,pvalue2,pvalue_correlation,S,intrication, viole_CHSH
 
 
 def projet(nom_dossier):
@@ -71,22 +73,52 @@ def projet(nom_dossier):
     print(f"fichiers allant de 00 à {nb_fichiers-1}")
 
     #Création du fichier csv
-    colonnes=["fichier", "angle1", "pvalue1", "angle2", "pvalue2", "pvalue_correlation", "intrication"]
+    colonnes=["fichier", "angle1", "pvalue1", "angle2", "pvalue2", "pvalue_correlation", "S", "intrication", "viole CHSH"]
     ans = pd.DataFrame(columns=colonnes)
     ans.to_csv(f"polar-2photons-{nom_dossier}.csv", index=False)
 
     for i in range(nb_fichiers):
         if i < 10:
             data = pd.read_csv(f"./test-projet/{nom_dossier}/dataset-0{i}.csv", sep=';')
-            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication = analyse(data)
-            nouvelle_ligne = {"fichier": f"dataset-0{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "intrication": intrication}
+            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,S,intrication, CHSH = analyse(data)
+            nouvelle_ligne = {"fichier": f"dataset-0{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "S": S, "intrication": intrication, "viole CHSH": CHSH}
         else:
             data = pd.read_csv(f"./test-projet/{nom_dossier}/dataset-{i}.csv", sep=';')
-            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication = analyse(data)
-            nouvelle_ligne = {"fichier": f"dataset-{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "intrication": intrication}
+            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication, CHSH = analyse(data)
+            nouvelle_ligne = {"fichier": f"dataset-{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "S": S, "intrication": intrication, "viole CHSH": CHSH}
         ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv")
         ans.loc[len(ans)] = nouvelle_ligne
         ans.to_csv(f"polar-2photons-{nom_dossier}.csv", index=False)
+        print(f"fichier {i} analysé, S = {S}")
+
+def quiz(nom_dossier):
+    alpha = 0.05
+
+    projet(nom_dossier)
+
+    ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv")
+
+    # Conditions polarisation identifiable
+    polA = ans["pvalue1"] > alpha
+    polB = ans["pvalue2"] > alpha
+
+    # Polarisations identiques
+    rep1 = ((polA) & (polB) & (abs(ans["angle1"] - ans["angle2"]) < 2)).sum()
+
+    # Polarisations différentes
+    rep2 = ((polA) & (polB) & (abs(ans["angle1"] > ans["angle2"]) > 2)).sum()
+
+    # Corrélation identifiable
+    #rep3 = (ans["pvalue_correlation"] < alpha).sum()
+    rep3 = (ans["intrication"] == True).sum()
+    # Violation CHSH
+    rep4 = (ans["viole CHSH"] == True).sum()
+
+    print("Nombre de fichiers avec :")
+    print("avec 2 polarisations linéaires identifiables (p-valeur > 0.05) identiques :", rep1)
+    print("avec 2 polarisations linéaires identifiables (p-valeur idem) différentes :", rep2)
+    print("présentant une corrélation identifiable (p-valeur idem) sur les coïncidences entre les photons A et B :", rep3)
+    print("présentant une violation de l'inégalité CHSH :", rep4)
 
 
 if __name__ == "__main__":
@@ -107,9 +139,9 @@ if __name__ == "__main__":
     #df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
 
     #Test unitaire
-    #data = pd.read_csv("./test-projet/polar-2photons-1sozuv/dataset-01.csv", sep=';')
+    #data = pd.read_csv("./test-projet/polar-2photons-cwhpxf/dataset-09.csv", sep=';')
     #test_unitaire(data)
 
     # Test projet
-    nom_dossier = "polar-2photons-4zrf4r"
-    projet(nom_dossier)
+    nom_dossier = "polar-2photons-plpws7"
+    quiz(nom_dossier)
