@@ -14,23 +14,27 @@ import eval_intric
 import eval_model
 
 if __name__ == "__main__":
-    #Chargement des jeux de données
-    #jour2-1
-    df_45_1M=pd.read_csv("./jour2-1-facile/2photons-45-1M.csv", sep=';')
-    df_autre_1M=pd.read_csv("./jour2-1-facile/2photons-autre-1M.csv", sep=';')
-    df_circ_1M=pd.read_csv("./jour2-1-facile/2photons-circ-1M.csv", sep=';')
-    df_epr_1M=pd.read_csv("./jour2-1-facile/2photons-epr-1M.csv", sep=';')
-    df_xx_1M=pd.read_csv("./jour2-1-facile/2photons-xx-1M.csv", sep=';')
-    df_yy_1M=pd.read_csv("./jour2-1-facile/2photons-yy-1M.csv", sep=';')
+    ######## Chargement des jeux de données
+    
+    #jour2
+    # Batteries de test sans bruit
+    #df_45_1M=pd.read_csv("./jour2-1-facile/2photons-45-1M.csv", sep=';')
+    #df_autre_1M=pd.read_csv("./jour2-1-facile/2photons-autre-1M.csv", sep=';')
+    #df_circ_1M=pd.read_csv("./jour2-1-facile/2photons-circ-1M.csv", sep=';')
+    #df_epr_1M=pd.read_csv("./jour2-1-facile/2photons-epr-1M.csv", sep=';')
+    #df_xx_1M=pd.read_csv("./jour2-1-facile/2photons-xx-1M.csv", sep=';')
+    #df_yy_1M=pd.read_csv("./jour2-1-facile/2photons-yy-1M.csv", sep=';')
+    #
+    #  Batteire de tests avec bruit
     df_epr=pd.read_csv("./jour2-2-moyen/2photons-epr.csv", sep=';')
     df_xx=pd.read_csv("./jour2-2-moyen/2photons-xx.csv", sep=';')
     df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
 
 
     #Choix du jeu de données
-    data=df_xx
+    data=df_yy
 
-    #### Vérification de la conformité du jeu de données et mise en forme
+    ######## Vérification de la conformité du jeu de données et mise en forme
     (_, nb_col) = data.shape
     assert(nb_col == 6), "Vérifier le nombre de colonnes du jeu de donées" # Bon nombre de colonnes
     
@@ -44,7 +48,7 @@ if __name__ == "__main__":
     data = data[valid] #sélection des données conformes au domaine étudié
 
     # Affichage des histogrammes
-    hist.aff_hist(data)
+    hist.proba_X(data)
 
     intric=eval_intric.eval_intric(data) # True si les photons sont intriqués
 
@@ -52,6 +56,6 @@ if __name__ == "__main__":
         print("Les photons sont intriqués")
     else:
         print("Les photons sont indépendants")
-        (theta1, theta2) = eval_model.theta(data)
+        (theta1, theta2) = eval_model.theta_model(data)
     
     plt.show()
