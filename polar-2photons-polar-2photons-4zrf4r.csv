@@ -1,0 +1,8 @@
+fichier,angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication
+dataset-00.csv,-1.0,-1.0,-1.0,-1.0,1.0,False
+dataset-01.csv,-1.0,-1.0,155.20000000000002,0.8458126458299331,0.0,False
+dataset-02.csv,110.0,0.5813624087763595,109.7,0.6466623189666701,0.0,False
+dataset-03.csv,-1.0,-1.0,-1.0,-1.0,0.0,False
+dataset-04.csv,-1.0,-1.0,-1.0,-1.0,1.0,True
+dataset-05.csv,-1.0,-1.0,-1.0,-1.0,0.0,False
+dataset-06.csv,-1.0,-1.0,-1.0,-1.0,0.0,False

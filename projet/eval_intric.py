@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 # Fonction de comptage des mesures et des coïncidences (XX, XY, ...)
 # ainsi que la quantité E, dans des tableaux 2D indexés par les angles
 # (alpha sur l'axe 0, beta sur l'axe 1).
+"""
 def count_detections(data, angles):
     nb_angles = len(angles)
     (count_measurements, count_xx, count_xy, count_yx, count_yy) = (
@@ -23,6 +24,33 @@ def count_detections(data, angles):
 
     E = (count_xx + count_yy - count_yx - count_xy) / count_measurements
     return (count_measurements, count_xx, count_xy, count_yx, count_yy, E)
+"""
+def count_detections(data, angles):
+    nb_angles = len(angles)
+    (count_measurements, count_xx, count_xy, count_yx, count_yy) = (
+        np.zeros((nb_angles, nb_angles)) for _ in range(5)
+    )
+
+    for i, alpha in enumerate(angles):
+        for j, beta in enumerate(angles):
+            select_angles = (data.alpha == alpha) & (data.beta == beta)
+            count_measurements[i, j] = select_angles.sum()
+
+            (Xa, Xb, Ya, Yb) = (data[name][select_angles] == 1 for name in ('Xa', 'Xb', 'Ya', 'Yb'))
+            count_xx[i, j] = (Xa & Xb).sum()
+            count_xy[i, j] = (Xa & Yb).sum()
+            count_yx[i, j] = (Ya & Xb).sum()
+            count_yy[i, j] = (Ya & Yb).sum()
+
+    # ---- CORRECTION ICI ----
+    numerator = count_xx + count_yy - count_yx - count_xy
+
+    E = np.full_like(count_measurements, np.nan, dtype=float)  # tableau rempli de NaN
+    mask = count_measurements > 0                               # seulement où on a des données
+    E[mask] = numerator[mask] / count_measurements[mask]        # division sûre
+
+    return (count_measurements, count_xx, count_xy, count_yx, count_yy, E)
+
 
 # Fonction de calcul de S à partir du tableau E.
 def S_from_E(E):
@@ -55,8 +83,16 @@ def eval_intric(data):
     # le min.
     (counts, _, _, _, _, E) = count_detections(data_test_S, angles)
     S = E[i_alpha1, i_beta1] + E[i_alpha2, i_beta1] - E[i_alpha1, i_beta2] + E[i_alpha2, i_beta2]
-    num = min(counts[i_alpha1, i_beta1], counts[i_alpha2, i_beta1],
-            counts[i_alpha1, i_beta2], counts[i_alpha2, i_beta2])
-    pval = 2 * math.exp(-((abs(S) - 2)**2 * num) / 16) #évalue l'éloignement de S à 2 (hypothèse de modèle classique) : probabilité d’observer un S aussi loin de 2
-    #print(f'|S| max = {abs(S)}, pvalue <= {pval}')
-    return abs(S), pval
+    print(f"S: {abs(S)}")
+    if abs(S) <= 2: #hors du domaine d'application de la p-value
+        return abs(S), 0
+    else:
+        num = min(counts[i_alpha1, i_beta1], counts[i_alpha2, i_beta1],
+                counts[i_alpha1, i_beta2], counts[i_alpha2, i_beta2])
+        if num < 10:
+            print("Pas assez de mesures pour ce couple d'angles")
+            return abs(S), 1.0
+
+        pval = min(1.0, 2 * math.exp(-((abs(S) - 2)**2 * num) / 16)) #évalue l'éloignement de S à 2 (hypothèse de modèle classique) : probabilité d’observer un S aussi loin de 2
+        print(f'|S| max = {abs(S)}, pvalue <= {pval}')
+        return abs(S), pval

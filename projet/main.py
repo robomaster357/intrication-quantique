@@ -36,8 +36,12 @@ def test_unitaire(data): #version graphique et jolie de l'analyse des fichiers
         print("Les photons sont intriqués")
     else:
         print("Les photons sont indépendants")
-        (theta1, theta2) = eval_model.theta_model(data)
-    
+    #((theta1, A1, B1, rmse1, pavalue1), (theta2, A2, B2, rmse2, pvalue2)) = eval_model.theta_model(data)
+    #print(theta1, rmse1)
+    #print(theta2, rmse2)
+    (theta1, ptheta1, theta2, ptheta2) = eval_model.theta_ideal(data)
+    print(theta1, ptheta1)
+    print(theta2, ptheta2)
     plt.show()
 
 def analyse(data):
@@ -57,12 +61,12 @@ def analyse(data):
     ######## Extraction des différents paramètres
     S, pvalue_correlation = eval_intric.eval_intric(data)
     intrication = S > 2.1
-    ((angle1, _, _ , _, pvalue1), (angle2, _, _, _, pvalue2)) = eval_model.theta_model(data) #Méthode de Fischer ne marche pas pour df_xx
+    (angle1, pvalue1, angle2, pvalue2) = eval_model.theta_ideal(data) #Méthode de Fischer ne marche pas pour df_xx
     return angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication
 
 
 def projet(nom_dossier):
-    dossier = Path(nom_dossier)
+    dossier = Path(f"./test-projet/{nom_dossier}")
     nb_fichiers = sum(1 for f in dossier.iterdir() if f.is_file())
     print(f"fichiers allant de 00 à {nb_fichiers-1}")
 
@@ -80,7 +84,7 @@ def projet(nom_dossier):
             data = pd.read_csv(f"./test-projet/{nom_dossier}/dataset-{i}.csv", sep=';')
             angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication = analyse(data)
             nouvelle_ligne = {"fichier": f"dataset-{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "intrication": intrication}
-        ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv", sep=';')
+        ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv")
         ans.loc[len(ans)] = nouvelle_ligne
         ans.to_csv(f"polar-2photons-{nom_dossier}.csv", index=False)
 
@@ -98,14 +102,14 @@ if __name__ == "__main__":
     #df_yy_1M=pd.read_csv("./jour2-1-facile/2photons-yy-1M.csv", sep=';')
     
     #  Batteire de tests avec bruit
-    df_epr=pd.read_csv("./jour2-2-moyen/2photons-epr.csv", sep=';')
-    df_xx=pd.read_csv("./jour2-2-moyen/2photons-xx.csv", sep=';')
-    df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
+    #df_epr=pd.read_csv("./jour2-2-moyen/2photons-epr.csv", sep=';')
+    #df_xx=pd.read_csv("./jour2-2-moyen/2photons-xx.csv", sep=';')
+    #df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
 
     #Test unitaire
-    #data = df_xx
+    #data = pd.read_csv("./test-projet/polar-2photons-1sozuv/dataset-01.csv", sep=';')
     #test_unitaire(data)
 
     # Test projet
-    nom_dossier = "polar-2photons-1sozuv"
+    nom_dossier = "polar-2photons-4zrf4r"
     projet(nom_dossier)
