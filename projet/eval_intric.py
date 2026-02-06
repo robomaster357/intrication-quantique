@@ -59,4 +59,4 @@ def eval_intric(data):
             counts[i_alpha1, i_beta2], counts[i_alpha2, i_beta2])
     pval = 2 * math.exp(-((abs(S) - 2)**2 * num) / 16) #évalue l'éloignement de S à 2 (hypothèse de modèle classique) : probabilité d’observer un S aussi loin de 2
     print(f'|S| max = {abs(S)}, pvalue <= {pval}')
-    return abs(S) > 2.1
+    return abs(S), pval

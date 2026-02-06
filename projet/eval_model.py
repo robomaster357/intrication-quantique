@@ -10,8 +10,8 @@ from scipy.optimize import curve_fit
 
 # Définir une fonction pour la loi de probabilité, en fonction des angles en degrés.
 # La fonction peut opérer sur des nombres ou des tableaux.
-def f_proba_ideal(alpha, theta, A, B):
-    return A*np.cos(np.radians(alpha-theta))**2 + B
+def f_proba_ideal(alpha, theta):
+    return np.cos(np.radians(alpha-theta))**2
 
 # Fonction pour calculer la valeur-p pour un theta spécifique.
 def pvalue(theta):
@@ -61,6 +61,7 @@ def eval_theta_ideal(data):
     #print(table_pvalues[table_pvalues > 0.05])
     indices_pvaleur_grande = np.where(table_pvalues > 0.05)[0]
     if len(indices_pvaleur_grande)>0: # existence d'un intervalle de theta vérifiant p-valeur > 0.05
+        print(test_theta[indices_pvaleur_grande[-1]], test_theta[indices_pvaleur_grande[0]])
         if abs(test_theta[indices_pvaleur_grande[-1]]-test_theta[indices_pvaleur_grande[0]]) < 5 : 
             assert(abs(test_theta[indices_pvaleur_grande[-1]]-test_theta[indices_pvaleur_grande[0]]) < 1), "Evaluation de theta trop imprécise"
             CI = [float(test_theta[indices_pvaleur_grande[0]]), float(test_theta[indices_pvaleur_grande[-1]])]
@@ -76,7 +77,7 @@ def theta_ideal(data):
     data1 = data1.rename(columns={'alpha': 'alpha', 'Xa':'X', 'Ya':'Y'})
     data2 = data[['beta', 'Xb', 'Yb']]
     data2 = data2.rename(columns={'beta': 'alpha', 'Xb':'X', 'Yb':'Y'})
-    theta1 = eval_theta_model(data1) #theta_alpha appartenant à l'intervalle de confiance
+    theta1 = eval_theta_ideal(data1) #theta_alpha appartenant à l'intervalle de confiance
     
     if theta1:
         if isinstance(theta1[0], float):
@@ -86,12 +87,12 @@ def theta_ideal(data):
     else:
         print("Aucun θ compatible avec une loi cos² — modèle rejeté pour alpha.")
     
-    theta2 = eval_theta_model(data2) #theta_beta appartenant à l'intervalle de confiance
+    theta2 = eval_theta_ideal(data2) #theta_beta appartenant à l'intervalle de confiance
     if theta2:
         if isinstance(theta2[0], float):
-            print(f"Estimation de theta pour alpha entre : [{theta2[0]} ; {theta2[0]}]")
+            print(f"Estimation de theta pour beta entre : [{theta2[0]} ; {theta2[0]}]")
         else:
-            print(f"Estimation de theta pour alpha entre : d'une part [{theta2[0][0]} ; {theta2[0][1]}] et d'autre part [{theta2[1][0]} ; {theta2[1][1]}]")
+            print(f"Estimation de theta pour beta entre : d'une part [{theta2[0][0]} ; {theta2[0][1]}] et d'autre part [{theta2[1][0]} ; {theta2[1][1]}]")
     else:
         print("Aucun θ compatible avec une loi cos² — modèle rejeté pour beta.")
     return (theta1, theta2)
@@ -149,7 +150,7 @@ def theta_model(data):
     else:
         print(f"Le modèle en cos²(α-θ) est faux: rmse = {rmse1}")
 
-    (theta2, A2, B2, rmse2) = eval_theta_model(data1) #theta_alpha appartenant à l'intervalle de confiance
+    (theta2, A2, B2, rmse2) = eval_theta_model(data2) #theta_alpha appartenant à l'intervalle de confiance
     if rmse2 < 0.1: 
         print(f"Pour beta θ vaut {theta2} -> modèle de la forme {A2}cos²(β-{theta2})+{B2} avec rmse={rmse2}")
     else:
