@@ -146,5 +146,5 @@ if __name__ == "__main__":
     #test_unitaire(data)
 
     # Test projet
-    nom_dossier = "polar-2photons-dc660a"
+    nom_dossier = "polar-2photons-dc660a" #n'existe plus mais c'était le dossier ou etait enregistré les 10 ou 100 datasets
     quiz(nom_dossier)
