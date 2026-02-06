@@ -142,9 +142,9 @@ if __name__ == "__main__":
     #df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
 
     #Test unitaire
-    #data = pd.read_csv("./test-projet/polar-2photons-cwhpxf/dataset-09.csv", sep=';')
+    #data = pd.read_csv("./test-projet/polar-2photons-sbc4jm/dataset-75.csv", sep=';')
     #test_unitaire(data)
 
     # Test projet
-    nom_dossier = "polar-2photons-v80agh"
+    nom_dossier = "polar-2photons-dc660a"
     quiz(nom_dossier)
