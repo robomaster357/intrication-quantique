@@ -99,8 +99,11 @@ def quiz(nom_dossier):
     ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv")
 
     # Conditions polarisation identifiable
-    polA = ans["pvalue1"] > alpha
-    polB = ans["pvalue2"] > alpha
+    #polA = ans["pvalue1"] > alpha
+    #polB = ans["pvalue2"] > alpha
+
+    polA = ans["pvalue1"] != -1
+    polB = ans["pvalue2"] != -1
 
     # Polarisations identiques
     rep1 = ((polA) & (polB) & (abs(ans["angle1"] - ans["angle2"]) < 2)).sum()
@@ -143,5 +146,5 @@ if __name__ == "__main__":
     #test_unitaire(data)
 
     # Test projet
-    nom_dossier = "polar-2photons-plpws7"
+    nom_dossier = "polar-2photons-v80agh"
     quiz(nom_dossier)
