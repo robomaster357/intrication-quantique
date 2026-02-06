@@ -109,7 +109,7 @@ def quiz(nom_dossier):
     rep1 = ((polA) & (polB) & (abs(ans["angle1"] - ans["angle2"]) < 2)).sum()
 
     # Polarisations différentes
-    rep2 = ((polA) & (polB) & (abs(ans["angle1"] > ans["angle2"]) > 2)).sum()
+    rep2 = ((polA) & (polB) & (abs(ans["angle1"] - ans["angle2"]) > 2)).sum()
 
     # Corrélation identifiable
     #rep3 = (ans["pvalue_correlation"] < alpha).sum()
