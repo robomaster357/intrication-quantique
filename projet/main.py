@@ -31,22 +31,34 @@ def test_unitaire(data): #version graphique et jolie de l'analyse des fichiers
     # Affichage des histogrammes
     hist.proba_X(data)
 
-    intric=eval_intric.eval_intric(data) # True si les photons sont intriqués
-
-    if intric:
+    S, pval=eval_intric.eval_intric(data) # True si les photons sont intriqués
+    if S > 2.1:
         print("Les photons sont intriqués")
     else:
         print("Les photons sont indépendants")
-        (theta1, theta2) = eval_model.theta_ideal(data)
+        (theta1, theta2) = eval_model.theta_model(data)
     
     plt.show()
 
 def analyse(data):
-    pvalue_correlation, S = eval_intric.eval_intric(data)
+    ######## Vérification de la conformité du jeu de données et mise en forme
+    (_, nb_col) = data.shape
+    assert(nb_col == 6), "Vérifier le nombre de colonnes du jeu de donées" # Bon nombre de colonnes
+    
+    col=list(data.columns)
+    data = data.rename(columns={col[0]: 'alpha', col[1]: 'beta', col[2]: 'Xa', col[3]:'Ya', col[4]:'Xb', col[5]:'Yb'}) # Renommage des colonnes pour faciliter le traitement de données
+    
+    valid = (
+        ((data.Xa + data.Ya) == 1) &  # côté A : un seul détecteur
+        ((data.Xb + data.Yb) == 1)    # côté B : un seul détecteur
+    )
+    data = data[valid] #sélection des données conformes au domaine étudié
+
+    ######## Extraction des différents paramètres
+    S, pvalue_correlation = eval_intric.eval_intric(data)
     intrication = S > 2.1
-    ((angle1, _, _ , _), (angle2, _, _, _)) = eval_model.theta_model(data) #Méthode de Fischer ne marche pas pour df_xx
-    pass
-    #return angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication
+    ((angle1, _, _ , _, pvalue1), (angle2, _, _, _, pvalue2)) = eval_model.theta_model(data) #Méthode de Fischer ne marche pas pour df_xx
+    return angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication
 
 
 def projet(nom_dossier):
@@ -54,13 +66,23 @@ def projet(nom_dossier):
     nb_fichiers = sum(1 for f in dossier.iterdir() if f.is_file())
     print(f"fichiers allant de 00 à {nb_fichiers-1}")
 
-    réponses=[]
+    #Création du fichier csv
+    colonnes=["fichier", "angle1", "pvalue1", "angle2", "pvalue2", "pvalue_correlation", "intrication"]
+    ans = pd.DataFrame(columns=colonnes)
+    ans.to_csv(f"polar-2photons-{nom_dossier}.csv", index=False)
+
     for i in range(nb_fichiers):
         if i < 10:
             data = pd.read_csv(f"./test-projet/{nom_dossier}/dataset-0{i}.csv", sep=';')
+            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication = analyse(data)
+            nouvelle_ligne = {"fichier": f"dataset-0{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "intrication": intrication}
         else:
             data = pd.read_csv(f"./test-projet/{nom_dossier}/dataset-{i}.csv", sep=';')
-        réponses.append(analyse(data))
+            angle1,pvalue1,angle2,pvalue2,pvalue_correlation,intrication = analyse(data)
+            nouvelle_ligne = {"fichier": f"dataset-{i}.csv", "angle1": angle1, "pvalue1": pvalue1, "angle2": angle2, "pvalue2": pvalue2, "pvalue_correlation": pvalue_correlation, "intrication": intrication}
+        ans = pd.read_csv(f"polar-2photons-{nom_dossier}.csv", sep=';')
+        ans.loc[len(ans)] = nouvelle_ligne
+        ans.to_csv(f"polar-2photons-{nom_dossier}.csv", index=False)
 
 
 if __name__ == "__main__":
@@ -81,8 +103,8 @@ if __name__ == "__main__":
     df_yy=pd.read_csv("./jour2-2-moyen/2photons-yy.csv", sep=';')
 
     #Test unitaire
-    data = df_xx
-    test_unitaire(data)
+    #data = df_xx
+    #test_unitaire(data)
 
     # Test projet
     nom_dossier = "polar-2photons-1sozuv"

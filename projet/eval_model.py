@@ -3,7 +3,7 @@ import pandas as pd # type: ignore
 import scipy.stats as sps
 from scipy.stats import chi2
 from scipy.optimize import curve_fit
-
+from scipy import stats
 
 
 ###################################### Evaluation de théta par méthode de Fischer ################################
@@ -111,6 +111,7 @@ def f_proba_model(alpha, theta, A, B):
     # Modèle réaliste : visibilité A + bruit B
     return A * np.cos(np.radians(alpha - theta))**2 + B
 
+"""
 def eval_theta_model(data):
     global table_alpha, obs, test_theta, table_alpha_uniques, nb_alpha, moyenne_obs_alpha
     table_alpha = data.alpha
@@ -136,6 +137,41 @@ def eval_theta_model(data):
     rmse = np.sqrt(np.mean(residus**2))
     
     return round(theta_est, 0), round(A_est, 2), round(B_est, 2), round(rmse, 3)
+"""
+
+def eval_theta_model(data):
+    table_alpha = data.alpha.values
+    obs = data.X.values
+
+    alpha_vals = np.unique(table_alpha)
+    p_obs = np.array([np.mean(obs[table_alpha == a]) for a in alpha_vals])
+
+    # Ajustement
+    params, cov = curve_fit(
+        f_proba_model,
+        alpha_vals,
+        p_obs,
+        bounds=([0, 0, 0], [180, 1, 0.5])
+    )
+
+    theta_est, A_est, B_est = params
+
+    # --- Statistiques ---
+    residus = p_obs - f_proba_model(alpha_vals, *params)
+    dof = len(p_obs) - len(params)          # degrés de liberté
+    mse = np.sum(residus**2) / dof         # variance résiduelle
+
+    se = np.sqrt(np.diag(cov) * mse)       # erreurs standards
+
+    t_theta = theta_est / se[0]            # statistique t
+    p_theta = 2 * (1 - stats.t.cdf(abs(t_theta), dof))
+
+    rmse = np.sqrt(np.mean(residus**2))
+
+    #print(f"θ = {theta_est:.2f}° ± {se[0]:.2f}°  (p = {p_theta:.3e})")
+
+    return theta_est, A_est, B_est, rmse, p_theta
+
 
 def theta_model(data):
     global table_alpha, obs, test_theta, table_alpha_uniques, nb_alpha, moyenne_obs_alpha
@@ -144,15 +180,15 @@ def theta_model(data):
     data2 = data[['beta', 'Xb', 'Yb']]
     data2 = data2.rename(columns={'beta': 'alpha', 'Xb':'X', 'Yb':'Y'})
 
-    (theta1, A1, B1, rmse1) = eval_theta_model(data1) #theta_alpha appartenant à l'intervalle de confiance
-    if rmse1 < 0.1: 
-        print(f"Pour alpha θ vaut {theta1} -> modèle de la forme {A1}cos²(α-{theta1})+{B1} avec rmse={rmse1}")
+    (theta1, A1, B1, rmse1, pavalue1) = eval_theta_model(data1) #theta_alpha appartenant à l'intervalle de confiance
+    """if rmse1 < 0.1: 
+        print(f"Pour alpha θ vaut {theta1} -> modèle de la forme {A1}cos²(α-{theta1})+{B1} avec rmse={rmse1} et ptheta={pavalue1}")
     else:
-        print(f"Le modèle en cos²(α-θ) est faux: rmse = {rmse1}")
+        print(f"Le modèle en cos²(α-θ) est faux: rmse = {rmse1}")"""
 
-    (theta2, A2, B2, rmse2) = eval_theta_model(data2) #theta_alpha appartenant à l'intervalle de confiance
-    if rmse2 < 0.1: 
-        print(f"Pour beta θ vaut {theta2} -> modèle de la forme {A2}cos²(β-{theta2})+{B2} avec rmse={rmse2}")
+    (theta2, A2, B2, rmse2, pvalue2) = eval_theta_model(data2) #theta_alpha appartenant à l'intervalle de confiance
+    """if rmse2 < 0.1: 
+        print(f"Pour beta θ vaut {theta2} -> modèle de la forme {A2}cos²(β-{theta2})+{B2} avec rmse={rmse2} et ptheta={pvalue2}")
     else:
-        print(f"Le modèle en cos²(β-θ) est faux: rmse = {rmse2}")
-    return ((theta1, A1, B1, rmse1), (theta2, A2, B2, rmse2))
+        print(f"Le modèle en cos²(β-θ) est faux: rmse = {rmse2}")"""
+    return ((theta1, A1, B1, rmse1, pavalue1), (theta2, A2, B2, rmse2, pvalue2))
